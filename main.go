@@ -15,7 +15,7 @@ func main() {
 	router := gin.Default()
 
 	userGroup := router.Group("/User")
-	user.SetupSignUp(userGroup)
+	user.SetupEntry(userGroup)
 
 	err := router.Run(":8080")
 	if err != nil {
