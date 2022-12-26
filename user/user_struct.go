@@ -6,6 +6,7 @@ type SignUpDTO struct {
 	LastName  string `db:"lastname"`
 	Password  string `db:"password"`
 	Email     string `db:"email"`
+	Code      int    `db:"code"`
 }
 
 type VerifyUserSt struct {
