@@ -5,10 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var (
-	otpChars = "1234567890"
-)
-
+// ValidateLen not really necessary but I like making function
 func ValidateLen(validate string, length int) bool {
 	if len(validate) < length {
 		return true
@@ -16,6 +13,7 @@ func ValidateLen(validate string, length int) bool {
 	return false
 }
 
+// AcceptMethod overlaps almost every method call so, it is better to make a function that we can use in every route.
 func AcceptMethod(body interface{}, c *gin.Context) bool {
 	data, err := c.GetRawData()
 	if err != nil {
