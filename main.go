@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	port := ":8080"
 	//call the database connection at the beginning
 	database.ConnectDatabase()
 	// don't want to get warning every time I run
@@ -17,7 +18,8 @@ func main() {
 	userGroup := router.Group("/User")
 	user.SetupEntry(userGroup)
 
-	err := router.Run(":8080")
+	fmt.Println("server is running at", port)
+	err := router.Run(port)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
