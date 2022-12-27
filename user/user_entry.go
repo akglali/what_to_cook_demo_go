@@ -59,6 +59,7 @@ func verifyAccount(c *gin.Context) {
 	//checking if user is already exist before sent the email.
 	err, isUserExist := userExist(body.Email)
 	if err != nil || isUserExist {
+		fmt.Println(err)
 		helpers.BadRequestAbort(c, "User is already exist")
 		return
 	}
@@ -67,6 +68,11 @@ func verifyAccount(c *gin.Context) {
 	subject := "Test Email"
 	emailBody := "Your code is " + code
 	now := time.Now().Format(dateFormat)
+	err = sendEmail(subject, emailBody, email)
+	if err != nil {
+		helpers.BadRequestAbort(c, "Code is not sent please try again")
+		return
+	}
 	err = insertVerify(email, code, now)
 	if err != nil {
 		// if error is because of duplication we update the database. 23505 is duplicate error code
@@ -74,18 +80,13 @@ func verifyAccount(c *gin.Context) {
 			err = updateVerify(email, code, now)
 			err = sendEmail(subject, emailBody, email)
 			if err != nil {
-				helpers.BadRequestAbort(c, "Code is not sent please try again")
+				helpers.BadRequestAbort(c, "User is already exist")
 				return
 			}
 			c.JSON(200, "Your code is sent to "+body.Email)
 		} else {
 			helpers.BadRequestAbort(c, "Something went wrong!!")
 		}
-		return
-	}
-	err = sendEmail(subject, emailBody, email)
-	if err != nil {
-		helpers.BadRequestAbort(c, "Code is not sent please try again")
 		return
 	}
 
