@@ -46,6 +46,7 @@ func SignUp(c *gin.Context) {
 	token := tokenGenerator()
 	err = insertUser(body.Username, body.FirstName, body.LastName, password, body.Email, token)
 	if err != nil {
+		fmt.Println(err)
 		helpers.BadRequestAbort(c, "User is already exist")
 		return
 	}
@@ -68,25 +69,28 @@ func verifyAccount(c *gin.Context) {
 	subject := "Test Email"
 	emailBody := "Your code is " + code
 	now := time.Now().Format(dateFormat)
-	err = sendEmail(subject, emailBody, email)
-	if err != nil {
-		helpers.BadRequestAbort(c, "Code is not sent please try again")
-		return
-	}
 	err = insertVerify(email, code, now)
 	if err != nil {
 		// if error is because of duplication we update the database. 23505 is duplicate error code
 		if string(err.(*pq.Error).Code) == "23505" {
+			fmt.Println("user hasn't verified yet")
 			err = updateVerify(email, code, now)
 			err = sendEmail(subject, emailBody, email)
 			if err != nil {
-				helpers.BadRequestAbort(c, "User is already exist")
+				helpers.BadRequestAbort(c, "Code is not sent please try again")
 				return
 			}
 			c.JSON(200, "Your code is sent to "+body.Email)
+			return
 		} else {
 			helpers.BadRequestAbort(c, "Something went wrong!!")
 		}
+		return
+	}
+	//that sends the email
+	err = sendEmail(subject, emailBody, email)
+	if err != nil {
+		helpers.BadRequestAbort(c, "Code is not sent please try again")
 		return
 	}
 
