@@ -17,3 +17,9 @@ func NotAcceptableAbort(c *gin.Context, errorMessage string) {
 	//doesn't find any content that conforms to the criteria given by the user agent.
 	c.AbortWithStatusJSON(406, errorStruct{Error: errorMessage})
 }
+
+func UnAuth(c *gin.Context, errorMessage string) {
+	//406 This response is sent when the web server, after performing server-driven content negotiation,
+	//doesn't find any content that conforms to the criteria given by the user agent.
+	c.AbortWithStatusJSON(401, errorStruct{Error: errorMessage})
+}
