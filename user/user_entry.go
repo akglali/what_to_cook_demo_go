@@ -12,6 +12,7 @@ import (
 func SetupEntry(rg *gin.RouterGroup) {
 	rg.POST("", SignUp)
 	rg.POST("/Verify", verifyAccount)
+	rg.GET("/something", something)
 }
 
 func SignUp(c *gin.Context) {
@@ -44,14 +45,19 @@ func SignUp(c *gin.Context) {
 
 	password, _ := hashPassword(body.Password)
 	token := tokenGenerator()
-	err = insertUser(body.Username, body.FirstName, body.LastName, password, body.Email, token)
+	err = insertUser(body.Username, password, body.Email, token)
 	if err != nil {
 		fmt.Println(err)
 		helpers.BadRequestAbort(c, "User is already exist")
 		return
 	}
-
-	c.JSON(200, token)
+	jwtToken, err := helpers.GenerateJWT(token)
+	if err != nil {
+		fmt.Println(err)
+		helpers.BadRequestAbort(c, "Something went wrong")
+		return
+	}
+	c.JSON(200, jwtToken)
 }
 
 func verifyAccount(c *gin.Context) {
@@ -66,8 +72,9 @@ func verifyAccount(c *gin.Context) {
 	}
 	code, _ := GenerateOTP(6)
 	email := body.Email
-	subject := "Test Email"
-	emailBody := "Your code is " + code
+	/*	subject := "Test Email"
+		emailBody := "Your code is " + code*/
+	fmt.Println(code)
 	now := time.Now().Format(dateFormat)
 	err = insertVerify(email, code, now)
 	if err != nil {
@@ -75,11 +82,11 @@ func verifyAccount(c *gin.Context) {
 		if string(err.(*pq.Error).Code) == "23505" {
 			fmt.Println("user hasn't verified yet")
 			err = updateVerify(email, code, now)
-			err = sendEmail(subject, emailBody, email)
-			if err != nil {
-				helpers.BadRequestAbort(c, "Code is not sent please try again")
-				return
-			}
+			/*	err = sendEmail(subject, emailBody, email)
+				if err != nil {
+					helpers.BadRequestAbort(c, "Code is not sent please try again")
+					return
+				}*/
 			c.JSON(200, "Your code is sent to "+body.Email)
 			return
 		} else {
@@ -88,12 +95,23 @@ func verifyAccount(c *gin.Context) {
 		return
 	}
 	//that sends the email
-	err = sendEmail(subject, emailBody, email)
+	/*err = sendEmail(subject, emailBody, email)
 	if err != nil {
 		helpers.BadRequestAbort(c, "Code is not sent please try again")
 		return
-	}
-
+	}*/
 	c.JSON(200, "Your code is sent to "+body.Email)
+
+}
+
+func logout(c *gin.Context) {
+	token := c.GetHeader("token")
+	fmt.Println(token)
+}
+
+func something(c *gin.Context) {
+	token := c.GetHeader("Token")
+	verifyJwt := helpers.VerifyJWT(token, c)
+	fmt.Println(verifyJwt)
 
 }
