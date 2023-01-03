@@ -26,8 +26,8 @@ func updateVerify(email, code, now string) error {
 }
 
 // it inserts the user if user has passed all the required action successfully
-func insertUser(username, firstName, lastName, password, email, token string) error {
-	_, err := database.Db.Exec("insert into users_table(username,firstname,lastname,password,email,token) values ($1,$2,$3,$4,$5,$6)", username, firstName, lastName, password, email, token)
+func insertUser(username, password, email, token string) error {
+	_, err := database.Db.Exec("insert into users_table(username,password,email,token) values ($1,$2,$3,$4)", username, password, email, token)
 	if err != nil {
 		return err
 	}
