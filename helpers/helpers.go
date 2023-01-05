@@ -2,16 +2,10 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
-
-// ValidateLen not really necessary but I like making function
-func ValidateLen(validate string, length int) bool {
-	if len(validate) < length {
-		return true
-	}
-	return false
-}
 
 // AcceptMethod overlaps almost every method call so, it is better to make a function that we can use in every route.
 func AcceptMethod(body interface{}, c *gin.Context) bool {
@@ -20,11 +14,18 @@ func AcceptMethod(body interface{}, c *gin.Context) bool {
 		NotAcceptableAbort(c, "Input format is wrong")
 		return false
 	}
-	err = json.Unmarshal(data, &body)
-	if err != nil {
+
+	if err := json.Unmarshal(data, &body); err != nil {
+		fmt.Println(err)
 		BadRequestAbort(c, "Can't match with the struct")
 		return false
 	}
+
+	if err := validator.New().Struct(body); err != nil {
+		BadRequestAbort(c, err.Error())
+		return false
+	}
+
 	return true
 
 }
