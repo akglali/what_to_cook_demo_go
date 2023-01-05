@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -8,12 +9,12 @@ import (
 	"time"
 )
 
-func GenerateJWT(userId string) (string, error) {
+func GenerateJWT(userToken string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"exp":        time.Now().Add(1 * time.Minute).Unix(),
+		"exp":        time.Now().Add(168 * time.Hour).Unix(),
 		"authorized": true,
-		"user":       userId,
+		"user":       userToken,
 	})
 	tokenString, err := token.SignedString([]byte(os.Getenv("SECRETKEYJWT")))
 
@@ -26,7 +27,7 @@ func GenerateJWT(userId string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyJWT(tokenString string, c *gin.Context) bool {
+func VerifyJWT(tokenString string, c *gin.Context) (jwt.Claims, error) {
 	secret := []byte(os.Getenv("SECRETKEYJWT"))
 
 	// Parse the token and verify its signature
@@ -42,16 +43,15 @@ func VerifyJWT(tokenString string, c *gin.Context) bool {
 
 	// Check for errors
 	if err != nil {
-		UnAuth(c, err.Error())
-		return false
+		return nil, err
 	}
 
 	// Check that the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		fmt.Println("claims", claims["exp"])
-		return true
+		return claims, nil
 	} else {
 		fmt.Println("invalid token")
-		return false
+		return nil, errors.New("Invalid Token")
 	}
 }
