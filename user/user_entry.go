@@ -11,7 +11,7 @@ import (
 // SetupEntry it is a prefix routerGroup for entries
 func SetupEntry(rg *gin.RouterGroup) {
 	rg.POST("", SignUp)
-	rg.POST("/Verify", verifyAccount)
+	rg.POST("/Verify", VerifyAccount)
 }
 
 func SignUp(c *gin.Context) {
@@ -45,16 +45,16 @@ func SignUp(c *gin.Context) {
 		helpers.BadRequestAbort(c, "User is already exist")
 		return
 	}
-	jwtToken, err := helpers.GenerateJWT(token)
+	userToken, err := helpers.Encrypt(token)
 	if err != nil {
 		fmt.Println(err)
 		helpers.BadRequestAbort(c, "Something went wrong")
 		return
 	}
-	c.JSON(200, jwtToken)
+	c.JSON(200, userToken)
 }
 
-func verifyAccount(c *gin.Context) {
+func VerifyAccount(c *gin.Context) {
 	body := VerifyUserDTO{}
 	passedMarshall := helpers.AcceptMethod(&body, c)
 	if !passedMarshall {
@@ -63,6 +63,7 @@ func verifyAccount(c *gin.Context) {
 	//checking if user is already exist before sent the email.
 	err, isUserExist := userExist(body.Email)
 	if err != nil || isUserExist {
+		fmt.Println(err)
 		helpers.BadRequestAbort(c, "User is already exist")
 		return
 	}
@@ -74,7 +75,7 @@ func verifyAccount(c *gin.Context) {
 	if err := insertVerify(email, code, now); err != nil {
 		// if error is because of duplication we update the database. 23505 is duplicate error code
 		if string(err.(*pq.Error).Code) == "23505" {
-			fmt.Println("user hasn't verified yet")
+			//fmt.Println("user hasn't verified yet")
 			if err := updateVerify(email, code, now); err != nil {
 				// if database can't update the code.
 				helpers.BadRequestAbort(c, "Something went wrong")
@@ -100,3 +101,13 @@ func verifyAccount(c *gin.Context) {
 	c.JSON(200, "Your code is sent to "+body.Email)
 
 }
+
+/*func signIn() {
+
+}
+*/
+/*_, err, actualToken := helpers.UserAuth(userToken)
+if err != nil {
+fmt.Println(err.Error())
+}
+fmt.Println(actualToken)*/
