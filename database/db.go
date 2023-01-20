@@ -12,7 +12,7 @@ import (
 var Db *sql.DB
 
 func ConnectDatabase() {
-
+	//filepath.Join("/home/akgl/go/bin/", "wtc.env")
 	err := godotenv.Load() //by default, it is .env, so we don't have to write
 	if err != nil {
 		fmt.Println("Error is occurred  on .env file please check")
@@ -23,7 +23,6 @@ func ConnectDatabase() {
 	user := os.Getenv("USER")
 	dbname := os.Getenv("DB_NAME")
 	pass := os.Getenv("PASSWORD")
-
 	// set up postgres sql to open it.
 	psqlSetup := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable",
 		host, port, user, dbname, pass)

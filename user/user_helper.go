@@ -1,10 +1,12 @@
 package user
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 	"net/smtp"
 	"os"
 	"time"
@@ -94,4 +96,14 @@ func timeDiffSec(createdAt string) bool {
 	}
 	return true
 
+}
+
+// google sign up method
+func validateGoogleAccount(idToken string) {
+	payload, err := idtoken.Validate(context.Background(), idToken, os.Getenv("GOOGLE-CLIENT-ID"))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Print(payload.Claims)
 }

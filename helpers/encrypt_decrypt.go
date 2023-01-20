@@ -39,7 +39,7 @@ func Encrypt(userToken string) (string, error) {
 	// It's important to remember that ciphertexts must be authenticated
 	// (i.e. by using crypto/hmac) as well as being encrypted in order to
 	// be secure.
-	fmt.Printf("Ciphertext: %x\n", ciphertext)
+	//fmt.Printf("Ciphertext: %x\n", ciphertext)
 
 	return string(ciphertext), nil
 }

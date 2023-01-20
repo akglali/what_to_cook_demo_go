@@ -10,12 +10,13 @@ import (
 
 // SetupEntry it is a prefix routerGroup for entries
 func SetupEntry(rg *gin.RouterGroup) {
-	rg.POST("", SignUp)
-	rg.POST("/Verify", VerifyAccount)
+	rg.POST("", signUpEmail)
+	rg.POST("/Verify", verifyAccount)
+	rg.POST("/GoogleEntry", signUpGoogle)
 }
 
-func SignUp(c *gin.Context) {
-	body := SignUpDTO{}
+func signUpEmail(c *gin.Context) {
+	body := signUpDTO{}
 	passedMarshall := helpers.AcceptMethod(&body, c)
 	if !passedMarshall {
 		return
@@ -54,8 +55,8 @@ func SignUp(c *gin.Context) {
 	c.JSON(200, userToken)
 }
 
-func VerifyAccount(c *gin.Context) {
-	body := VerifyUserDTO{}
+func verifyAccount(c *gin.Context) {
+	body := verifyUserDTO{}
 	passedMarshall := helpers.AcceptMethod(&body, c)
 	if !passedMarshall {
 		return
@@ -99,6 +100,16 @@ func VerifyAccount(c *gin.Context) {
 		return
 	}
 	c.JSON(200, "Your code is sent to "+body.Email)
+
+}
+
+func signUpGoogle(c *gin.Context) {
+	body := googleSignInDTO{}
+	passedMarshalling := helpers.AcceptMethod(&body, c)
+	if !passedMarshalling {
+		return
+	}
+	validateGoogleAccount(body.IdToken)
 
 }
 

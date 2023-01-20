@@ -45,7 +45,7 @@ func deleteUserCode(email string) {
 }
 
 // verify the users code and expiration
-func verifyUser(email string, createdAt *string, code *int) error {
+func verifyUser(email string, createdAt *string, code *string) error {
 	err := database.Db.QueryRow("select created_at,code from verify_users_table where email=$1", email).Scan(&*createdAt, &*code)
 	if err != nil {
 		return err

@@ -15,6 +15,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 
+	//user router
 	userGroup := router.Group("/User")
 	user.SetupEntry(userGroup)
 
