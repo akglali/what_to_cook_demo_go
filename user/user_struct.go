@@ -14,3 +14,22 @@ type verifyUserDTO struct {
 type googleSignInDTO struct {
 	IdToken string `form:"id_token" json:"id_token" validate:"required"`
 }
+
+type googleIdTokenResp struct {
+	Iss           string `json:"iss"`
+	Azp           string `json:"azp"`
+	Aud           string `json:"aud"`
+	Sub           string `json:"sub"`
+	Email         string `json:"email"`
+	EmailVerified string `json:"email_verified"`
+	Name          string `json:"name"`
+	Picture       string `json:"picture"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Locale        string `json:"locale"`
+	Iat           string `json:"iat"`
+	Exp           string `json:"exp"`
+	Alg           string `json:"alg"`
+	Kid           string `json:"kid"`
+	Typ           string `json:"typ"`
+}

@@ -1,12 +1,14 @@
 package user
 
 import (
-	"context"
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/api/idtoken"
+	"io"
+	"net/http"
 	"net/smtp"
 	"os"
 	"time"
@@ -17,8 +19,8 @@ const sqlDateFormat = "2006-01-02T15:04:05Z"
 
 // hash the password for users safety
 func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+	generateFromPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(generateFromPassword), err
 
 }
 
@@ -100,10 +102,31 @@ func timeDiffSec(createdAt string) bool {
 
 // google sign up method
 func validateGoogleAccount(idToken string) {
-	payload, err := idtoken.Validate(context.Background(), idToken, os.Getenv("GOOGLE-CLIENT-ID"))
+	url := "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken
+	// Send GET request
+	res, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Print(payload.Claims)
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println("something went wrong")
+		}
+	}(res.Body)
+
+	body := &bytes.Buffer{}
+	_, err = io.Copy(body, res.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	var data googleIdTokenResp
+	err = json.Unmarshal(body.Bytes(), &data)
+	if err != nil {
+		return
+	}
+
+	fmt.Println(data.Email, data.EmailVerified, data.FamilyName, data.Name, data.Picture)
 }
